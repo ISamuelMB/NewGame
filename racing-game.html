@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Carros 3D</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
+            font-family: Arial, sans-serif;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        #speed {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        #physicsInfo {
+            font-size: 16px;
+            color: #00ff00;
+            margin-bottom: 10px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        #rwdInfo {
+            font-size: 14px;
+            color: #ffaa00;
+            margin-bottom: 10px;
+            background: rgba(255, 170, 0, 0.1);
+            padding: 5px;
+            border-radius: 5px;
+            border-left: 3px solid #ffaa00;
+        }
+        
+        #debugInfo {
+            font-size: 14px;
+            color: #ff0000;
+            margin-bottom: 10px;
+            background: rgba(255, 0, 0, 0.1);
+            padding: 5px;
+            border-radius: 5px;
+            border-left: 3px solid #ff0000;
+        }
+        
+        #controls {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        #wheelStatus {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .connected {
+            color: #00ff00;
+        }
+        
+        .disconnected {
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="ui">
+            <div id="speed">Velocidad: 0 km/h</div>
+            <div id="physicsInfo">Ángulo del auto: 0.0°</div>
+            <div id="controls">
+                <strong>Controles:</strong><br>
+                🎮 Volante G29: Dirección + Pedales<br>
+                ⌨️ Teclado: WASD o Flechas<br>
+                🖱️ Mouse: Mirar alrededor
+            </div>
+        </div>
+        
+        <div id="wheelStatus" class="disconnected">
+            Volante G29: Desconectado
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="racing-game.js"></script>
+</body>
+</html>
