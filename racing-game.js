@@ -6,15 +6,17 @@ class RacingGame {
         this.car = null;
         this.track = [];
         
-        // Car physics
-        this.carPosition = { x: 0, y: 0.10, z: 0 }; // Lower to ground level
+        // Car physics - positioned at perfectly aligned starting line
+        this.carPosition = { x: -250, y: 0.10, z: 0 }; // Starting at perfectly aligned circuit
         this.carRotation = { x: 0, y: 0, z: 0 };
         this.velocity = { x: 0, y: 0, z: 0 };
         this.speed = 0;
         this.maxSpeed = 200;
         this.acceleration = 0;
         this.steering = 0;
-        this.maxSteering = 0.25; // Increased from 0.15 for stronger steering
+        this.maxSteering = 1; // Giro base
+        this.keyboardMaxSteering = 0.5; // Giro con teclado
+        this.wheelMaxSteering = 1.5; // Giro con volante G29
         
         // Realistic car physics
         this.wheelbase = 2.6; // Distance between front and rear axles
@@ -95,73 +97,477 @@ class RacingGame {
     }
     
     createTrack() {
-        // Ground
-        const groundGeometry = new THREE.PlaneGeometry(200, 200);
-        const groundMaterial = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+        // PREMIUM RACING FACILITY GROUNDS
+        const groundGeometry = new THREE.PlaneGeometry(800, 800);
+        const groundMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x2d5a2d,
+            shininess: 10,
+            specular: 0x111111
+        });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
         this.scene.add(ground);
         
-        // Track (oval)
-        this.createOvalTrack();
+        // PADDOCK AREAS - Concrete surfaces
+        const paddockMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x666666,
+            shininess: 80,
+            specular: 0x333333
+        });
         
-        // Barriers
-        this.createBarriers();
+        // REMOVED - All paddock and service roads that might interfere
+        // Circuit area is now completely clean
+        
+        // Create professional racing circuit
+        this.createRacingCircuit();
+        
+        // Enhanced barriers and safety features
+        this.createEnhancedBarriers();
+        
+        // Add track decorations
+        this.addTrackDecorations();
     }
     
-    createOvalTrack() {
-        const trackWidth = 12;
-        const trackLength = 80;
-        const trackRadius = 25;
+    createRacingCircuit() {
+        const trackWidth = 18; // Wider track
         
-        // Straight sections
-        for (let i = 0; i < 2; i++) {
-            const trackGeometry = new THREE.BoxGeometry(trackLength, 0.1, trackWidth);
-            const trackMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
-            const trackSection = new THREE.Mesh(trackGeometry, trackMaterial);
-            trackSection.position.set(0, 0.05, i === 0 ? trackRadius : -trackRadius);
-            this.scene.add(trackSection);
-        }
+        // PREMIUM ASPHALT MATERIALS
+        const trackMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x2a2a2a,
+            shininess: 30,
+            specular: 0x111111
+        });
         
-        // Curved sections
-        for (let i = 0; i < 2; i++) {
-            const curve = new THREE.TorusGeometry(trackRadius, trackWidth / 2, 8, 16, Math.PI);
-            const curveMaterial = new THREE.MeshLambertMaterial({ color: 0x404040 });
-            const curveSection = new THREE.Mesh(curve, curveMaterial);
-            curveSection.rotation.x = -Math.PI / 2;
-            curveSection.rotation.z = i * Math.PI;
-            curveSection.position.set(i === 0 ? trackLength / 2 : -trackLength / 2, 0.05, 0);
-            this.scene.add(curveSection);
-        }
+        const curbMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0xff2222,
+            shininess: 50,
+            specular: 0x444444
+        });
         
-        // Starting line
-        const startLineGeometry = new THREE.BoxGeometry(trackWidth, 0.2, 2);
-        const startLineMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
-        const startLine = new THREE.Mesh(startLineGeometry, startLineMaterial);
-        startLine.position.set(0, 0.1, trackRadius);
-        this.scene.add(startLine);
-    }
-    
-    createBarriers() {
-        // Create safety barriers around the track
-        const barrierHeight = 2;
-        const barrierWidth = 0.5;
+        const stripeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
         
-        // Straight barriers
-        for (let side = 0; side < 2; side++) {
-            for (let section = 0; section < 2; section++) {
-                const barrierGeometry = new THREE.BoxGeometry(80, barrierHeight, barrierWidth);
-                const barrierMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-                const barrier = new THREE.Mesh(barrierGeometry, barrierMaterial);
-                barrier.position.set(
-                    0,
-                    barrierHeight / 2,
-                    (section === 0 ? 31 : -31) * (side === 0 ? 1 : -1)
-                );
-                this.scene.add(barrier);
+        // Create a PERFECTLY ALIGNED rectangular circuit
+        const trackPoints = [
+            // ===== START/FINISH STRAIGHT (Perfect horizontal line) =====
+            { x: -250, z: 0, width: trackWidth, elevation: 0 },
+            { x: -200, z: 0, width: trackWidth, elevation: 0 },
+            { x: -150, z: 0, width: trackWidth, elevation: 0 },
+            { x: -100, z: 0, width: trackWidth, elevation: 0 },
+            { x: -50, z: 0, width: trackWidth, elevation: 0 },
+            { x: 0, z: 0, width: trackWidth, elevation: 0 },
+            { x: 50, z: 0, width: trackWidth, elevation: 0 },
+            { x: 100, z: 0, width: trackWidth, elevation: 0 },
+            { x: 150, z: 0, width: trackWidth, elevation: 0 },
+            { x: 200, z: 0, width: trackWidth, elevation: 0 },
+            
+            // ===== TURN 1: Perfect 90° right turn (smooth arc) =====
+            { x: 210, z: -5, width: trackWidth, elevation: 0 },
+            { x: 218, z: -12, width: trackWidth, elevation: 0 },
+            { x: 225, z: -20, width: trackWidth, elevation: 0 },
+            { x: 232, z: -30, width: trackWidth, elevation: 0 },
+            { x: 238, z: -42, width: trackWidth, elevation: 0 },
+            { x: 242, z: -55, width: trackWidth, elevation: 0 },
+            { x: 245, z: -68, width: trackWidth, elevation: 0 },
+            
+            // ===== RIGHT STRAIGHT (Perfect vertical line) =====
+            { x: 250, z: -80, width: trackWidth, elevation: 0 },
+            { x: 250, z: -100, width: trackWidth, elevation: 0 },
+            { x: 250, z: -120, width: trackWidth, elevation: 0 },
+            { x: 250, z: -140, width: trackWidth, elevation: 0 },
+            { x: 250, z: -160, width: trackWidth, elevation: 0 },
+            { x: 250, z: -180, width: trackWidth, elevation: 0 },
+            
+            // ===== TURN 2: Perfect 90° right turn (smooth arc) =====
+            { x: 245, z: -192, width: trackWidth, elevation: 0 },
+            { x: 242, z: -205, width: trackWidth, elevation: 0 },
+            { x: 238, z: -218, width: trackWidth, elevation: 0 },
+            { x: 232, z: -230, width: trackWidth, elevation: 0 },
+            { x: 225, z: -240, width: trackWidth, elevation: 0 },
+            { x: 218, z: -248, width: trackWidth, elevation: 0 },
+            { x: 210, z: -255, width: trackWidth, elevation: 0 },
+            
+            // ===== BACK STRAIGHT (Perfect horizontal line) =====
+            { x: 200, z: -260, width: trackWidth, elevation: 0 },
+            { x: 150, z: -260, width: trackWidth, elevation: 0 },
+            { x: 100, z: -260, width: trackWidth, elevation: 0 },
+            { x: 50, z: -260, width: trackWidth, elevation: 0 },
+            { x: 0, z: -260, width: trackWidth, elevation: 0 },
+            { x: -50, z: -260, width: trackWidth, elevation: 0 },
+            { x: -100, z: -260, width: trackWidth, elevation: 0 },
+            { x: -150, z: -260, width: trackWidth, elevation: 0 },
+            { x: -200, z: -260, width: trackWidth, elevation: 0 },
+            
+            // ===== TURN 3: Perfect 90° right turn (smooth arc) =====
+            { x: -210, z: -255, width: trackWidth, elevation: 0 },
+            { x: -218, z: -248, width: trackWidth, elevation: 0 },
+            { x: -225, z: -240, width: trackWidth, elevation: 0 },
+            { x: -232, z: -230, width: trackWidth, elevation: 0 },
+            { x: -238, z: -218, width: trackWidth, elevation: 0 },
+            { x: -242, z: -205, width: trackWidth, elevation: 0 },
+            { x: -245, z: -192, width: trackWidth, elevation: 0 },
+            
+            // ===== LEFT STRAIGHT (Perfect vertical line) =====
+            { x: -250, z: -180, width: trackWidth, elevation: 0 },
+            { x: -250, z: -160, width: trackWidth, elevation: 0 },
+            { x: -250, z: -140, width: trackWidth, elevation: 0 },
+            { x: -250, z: -120, width: trackWidth, elevation: 0 },
+            { x: -250, z: -100, width: trackWidth, elevation: 0 },
+            { x: -250, z: -80, width: trackWidth, elevation: 0 },
+            { x: -250, z: -60, width: trackWidth, elevation: 0 },
+            
+            // ===== TURN 4: Perfect 90° right turn back to start (smooth arc) =====
+            { x: -245, z: -68, width: trackWidth, elevation: 0 },
+            { x: -242, z: -55, width: trackWidth, elevation: 0 },
+            { x: -238, z: -42, width: trackWidth, elevation: 0 },
+            { x: -232, z: -30, width: trackWidth, elevation: 0 },
+            { x: -225, z: -20, width: trackWidth, elevation: 0 },
+            { x: -218, z: -12, width: trackWidth, elevation: 0 },
+            { x: -210, z: -5, width: trackWidth, elevation: 0 }
+        ];
+        
+        // Create PREMIUM track segments with professional details
+        for (let i = 0; i < trackPoints.length - 1; i++) {
+            const current = trackPoints[i];
+            const next = trackPoints[i + 1];
+            
+            const length = Math.sqrt(Math.pow(next.x - current.x, 2) + Math.pow(next.z - current.z, 2));
+            const angle = Math.atan2(next.z - current.z, next.x - current.x);
+            
+            // MAIN ASPHALT SURFACE - Premium quality
+            const segmentGeometry = new THREE.BoxGeometry(length, 0.3, current.width);
+            const segment = new THREE.Mesh(segmentGeometry, trackMaterial);
+            
+            segment.position.set(
+                (current.x + next.x) / 2,
+                (current.elevation + next.elevation) / 2 + 0.15,
+                (current.z + next.z) / 2
+            );
+            segment.rotation.y = angle;
+            segment.receiveShadow = true;
+            segment.castShadow = true;
+            this.scene.add(segment);
+            
+            // CENTER LINE - Professional white stripes
+            const centerLineGeometry = new THREE.BoxGeometry(length, 0.32, 0.3);
+            const centerLine = new THREE.Mesh(centerLineGeometry, stripeMaterial);
+            centerLine.position.set(
+                (current.x + next.x) / 2,
+                (current.elevation + next.elevation) / 2 + 0.16,
+                (current.z + next.z) / 2
+            );
+            centerLine.rotation.y = angle;
+            this.scene.add(centerLine);
+            
+            // RACING LINE INDICATORS (darker asphalt from tire wear)
+            const racingLineGeometry = new THREE.BoxGeometry(length, 0.31, 3);
+            const racingLineMaterial = new THREE.MeshPhongMaterial({ 
+                color: 0x1a1a1a,
+                shininess: 60
+            });
+            const racingLine = new THREE.Mesh(racingLineGeometry, racingLineMaterial);
+            
+            // Offset racing line for realistic positioning
+            const lineOffsetX = Math.cos(angle + Math.PI/2) * 2;
+            const lineOffsetZ = Math.sin(angle + Math.PI/2) * 2;
+            
+            racingLine.position.set(
+                (current.x + next.x) / 2 + lineOffsetX,
+                (current.elevation + next.elevation) / 2 + 0.155,
+                (current.z + next.z) / 2 + lineOffsetZ
+            );
+            racingLine.rotation.y = angle;
+            this.scene.add(racingLine);
+            
+            // Skip automatic kerbs - we'll create them manually aligned
+            // (This section intentionally left empty for manual kerb creation)
+            
+            // RUMBLE STRIPS for corner exits
+            if (i % 8 === 0) { // Add rumble strips every 8th segment
+                for (let rumble = 0; rumble < 5; rumble++) {
+                    const rumbleGeometry = new THREE.BoxGeometry(2, 0.1, 0.8);
+                    const rumbleMaterial = new THREE.MeshLambertMaterial({ color: 0xff8800 });
+                    const rumbleStrip = new THREE.Mesh(rumbleGeometry, rumbleMaterial);
+                    
+                    const rumbleOffset = (rumble - 2) * 2.5;
+                    const rumbleX = (current.x + next.x) / 2 + Math.cos(angle) * rumbleOffset;
+                    const rumbleZ = (current.z + next.z) / 2 + Math.sin(angle) * rumbleOffset;
+                    
+                    rumbleStrip.position.set(
+                        rumbleX,
+                        (current.elevation + next.elevation) / 2 + 0.05,
+                        rumbleZ
+                    );
+                    rumbleStrip.rotation.y = angle;
+                    this.scene.add(rumbleStrip);
+                }
             }
         }
+        
+        // Create perfectly aligned kerbs for rectangular track
+        this.createAlignedKerbs(curbMaterial, stripeMaterial);
+        
+        // Enhanced starting line with grid positions
+        this.createStartingGrid();
+    }
+    
+    createEnhancedBarriers() {
+        const barrierHeight = 4;
+        const barrierMaterial = new THREE.MeshLambertMaterial({ color: 0x0066cc });
+        const tireMaterial = new THREE.MeshLambertMaterial({ color: 0x222222 });
+        
+        // PERFECTLY POSITIONED safety barriers - FAR from racing line
+        const barrierPositions = [
+            // Safe outer perimeter barriers - adjusted for curved track
+            { x: 0, z: 80, length: 600, rotation: 0 },      // North barrier
+            { x: 0, z: -320, length: 600, rotation: 0 },    // South barrier  
+            { x: 330, z: -120, length: 440, rotation: Math.PI/2 }, // East barrier
+            { x: -330, z: -120, length: 440, rotation: Math.PI/2 }  // West barrier
+        ];
+        
+        barrierPositions.forEach(pos => {
+            // Main barrier
+            const barrierGeometry = new THREE.BoxGeometry(pos.length, barrierHeight, 1);
+            const barrier = new THREE.Mesh(barrierGeometry, barrierMaterial);
+            barrier.position.set(pos.x, barrierHeight/2, pos.z);
+            barrier.rotation.y = pos.rotation;
+            barrier.castShadow = true;
+            this.scene.add(barrier);
+            
+            // Tire wall in front of barrier
+            for (let i = 0; i < pos.length/4; i++) {
+                const tireGeometry = new THREE.TorusGeometry(1, 0.3, 8, 16);
+                const tire = new THREE.Mesh(tireGeometry, tireMaterial);
+                const offset = (i - pos.length/8) * 4;
+                tire.position.set(
+                    pos.x + Math.cos(pos.rotation) * offset,
+                    0.5,
+                    pos.z + Math.sin(pos.rotation) * offset
+                );
+                tire.rotation.x = Math.PI/2;
+                tire.castShadow = true;
+                this.scene.add(tire);
+            }
+        });
+    }
+    
+    createAlignedKerbs(curbMaterial, stripeMaterial) {
+        const kerbHeight = 0.4;
+        const kerbWidth = 1.5;
+        const trackHalfWidth = 9; // Half of 18m track width
+        
+        // ===== HORIZONTAL KERBS (Start/Finish and Back Straights) =====
+        
+        // Start/Finish straight kerbs (top and bottom) - scaled for larger circuit
+        for (let side of [-1, 1]) {
+            const kerbGeometry = new THREE.BoxGeometry(450, kerbHeight, kerbWidth);
+            const kerb = new THREE.Mesh(kerbGeometry, curbMaterial);
+            kerb.position.set(-25, 0.2, side * (trackHalfWidth + 0.75));
+            kerb.castShadow = true;
+            this.scene.add(kerb);
+            
+            // White stripes for start/finish kerbs
+            for (let stripe = 0; stripe < 5; stripe++) {
+                const stripeGeometry = new THREE.BoxGeometry(450, kerbHeight + 0.01, 0.2);
+                const stripePattern = new THREE.Mesh(stripeGeometry, stripeMaterial);
+                stripePattern.position.set(-25, 0.205, side * (trackHalfWidth + 0.75) + (stripe - 2) * 0.3);
+                this.scene.add(stripePattern);
+            }
+        }
+        
+        // Back straight kerbs (top and bottom) - adjusted for curved track
+        for (let side of [-1, 1]) {
+            const kerbGeometry = new THREE.BoxGeometry(450, kerbHeight, kerbWidth);
+            const kerb = new THREE.Mesh(kerbGeometry, curbMaterial);
+            kerb.position.set(-25, 0.2, -260 + side * (trackHalfWidth + 0.75));
+            kerb.castShadow = true;
+            this.scene.add(kerb);
+            
+            // White stripes for back straight kerbs
+            for (let stripe = 0; stripe < 5; stripe++) {
+                const stripeGeometry = new THREE.BoxGeometry(450, kerbHeight + 0.01, 0.2);
+                const stripePattern = new THREE.Mesh(stripeGeometry, stripeMaterial);
+                stripePattern.position.set(-25, 0.205, -260 + side * (trackHalfWidth + 0.75) + (stripe - 2) * 0.3);
+                this.scene.add(stripePattern);
+            }
+        }
+        
+        // ===== VERTICAL KERBS (Left and Right Straights) =====
+        
+        // Right straight kerbs (left and right of vertical section) - scaled for larger circuit
+        for (let side of [-1, 1]) {
+            const kerbGeometry = new THREE.BoxGeometry(kerbWidth, kerbHeight, 120);
+            const kerb = new THREE.Mesh(kerbGeometry, curbMaterial);
+            kerb.position.set(250 + side * (trackHalfWidth + 0.75), 0.2, -120);
+            kerb.castShadow = true;
+            this.scene.add(kerb);
+            
+            // White stripes for right straight kerbs
+            for (let stripe = 0; stripe < 5; stripe++) {
+                const stripeGeometry = new THREE.BoxGeometry(0.2, kerbHeight + 0.01, 120);
+                const stripePattern = new THREE.Mesh(stripeGeometry, stripeMaterial);
+                stripePattern.position.set(250 + side * (trackHalfWidth + 0.75) + (stripe - 2) * 0.3, 0.205, -120);
+                this.scene.add(stripePattern);
+            }
+        }
+        
+        // Left straight kerbs (left and right of vertical section) - scaled for larger circuit
+        for (let side of [-1, 1]) {
+            const kerbGeometry = new THREE.BoxGeometry(kerbWidth, kerbHeight, 120);
+            const kerb = new THREE.Mesh(kerbGeometry, curbMaterial);
+            kerb.position.set(-250 + side * (trackHalfWidth + 0.75), 0.2, -120);
+            kerb.castShadow = true;
+            this.scene.add(kerb);
+            
+            // White stripes for left straight kerbs
+            for (let stripe = 0; stripe < 5; stripe++) {
+                const stripeGeometry = new THREE.BoxGeometry(0.2, kerbHeight + 0.01, 120);
+                const stripePattern = new THREE.Mesh(stripeGeometry, stripeMaterial);
+                stripePattern.position.set(-250 + side * (trackHalfWidth + 0.75) + (stripe - 2) * 0.3, 0.205, -120);
+                this.scene.add(stripePattern);
+            }
+        }
+        
+        // ===== CORNER KERBS (Angled for 90° turns) =====
+        
+        const cornerKerbData = [
+            // Turn 1 (top-right)
+            { x: 135, z: -15, rotation: Math.PI/4 },
+            // Turn 2 (bottom-right)  
+            { x: 135, z: -105, rotation: -Math.PI/4 },
+            // Turn 3 (bottom-left)
+            { x: -135, z: -105, rotation: Math.PI/4 },
+            // Turn 4 (top-left)
+            { x: -135, z: -15, rotation: -Math.PI/4 }
+        ];
+        
+        cornerKerbData.forEach(corner => {
+            for (let side of [-1, 1]) {
+                const kerbGeometry = new THREE.BoxGeometry(25, kerbHeight, kerbWidth);
+                const kerb = new THREE.Mesh(kerbGeometry, curbMaterial);
+                
+                const offsetX = Math.cos(corner.rotation + Math.PI/2) * side * 12;
+                const offsetZ = Math.sin(corner.rotation + Math.PI/2) * side * 12;
+                
+                kerb.position.set(corner.x + offsetX, 0.2, corner.z + offsetZ);
+                kerb.rotation.y = corner.rotation;
+                kerb.castShadow = true;
+                this.scene.add(kerb);
+                
+                // White stripes for corner kerbs
+                for (let stripe = 0; stripe < 3; stripe++) {
+                    const stripeGeometry = new THREE.BoxGeometry(25, kerbHeight + 0.01, 0.2);
+                    const stripePattern = new THREE.Mesh(stripeGeometry, stripeMaterial);
+                    
+                    const stripeOffsetX = Math.cos(corner.rotation + Math.PI/2) * side * 12;
+                    const stripeOffsetZ = Math.sin(corner.rotation + Math.PI/2) * side * 12;
+                    const stripeOffsetPerp = (stripe - 1) * 0.4;
+                    
+                    stripePattern.position.set(
+                        corner.x + stripeOffsetX + Math.cos(corner.rotation) * stripeOffsetPerp,
+                        0.205,
+                        corner.z + stripeOffsetZ + Math.sin(corner.rotation) * stripeOffsetPerp
+                    );
+                    stripePattern.rotation.y = corner.rotation;
+                    this.scene.add(stripePattern);
+                }
+            }
+        });
+    }
+
+    createStartingGrid() {
+        const trackWidth = 15;
+        
+        // PERFECTLY ALIGNED starting line
+        const startLineGeometry = new THREE.BoxGeometry(trackWidth, 0.5, 5);
+        const startLineMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+        const startLine = new THREE.Mesh(startLineGeometry, startLineMaterial);
+        startLine.position.set(-150, 0.25, 0);
+        this.scene.add(startLine);
+        
+        // Aligned F1-style grid
+        for (let i = 0; i < 10; i++) {
+            const gridGeometry = new THREE.BoxGeometry(8, 0.4, 2);
+            const gridMaterial = new THREE.MeshLambertMaterial({ 
+                color: i === 0 ? 0x00ff00 : 0xffff00 // Pole position in green
+            });
+            const gridLine = new THREE.Mesh(gridGeometry, gridMaterial);
+            gridLine.position.set(-145 + i * 30, 0.2, 0);
+            this.scene.add(gridLine);
+        }
+    }
+    
+    addTrackDecorations() {
+        // Grandstands
+        this.createGrandstands();
+        
+        // Pit lane
+        this.createPitLane();
+        
+        // Trees and scenery
+        this.addScenery();
+        
+        // Track markers
+        this.addTrackMarkers();
+    }
+    
+    createGrandstands() {
+        // REMOVED - All grandstands that might interfere with track visibility
+        // Circuit is now completely clear for optimal racing
+    }
+    
+    createPitLane() {
+        // PADDOCK AREAS - Concrete surfaces for teams and garages
+        const paddockMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x999999, 
+            shininess: 30,
+            specular: 0x222222
+        });
+        
+        // Main paddock area behind start/finish straight - scaled for larger circuit
+        const paddockGeometry = new THREE.BoxGeometry(450, 0.2, 60);
+        const paddock = new THREE.Mesh(paddockGeometry, paddockMaterial);
+        paddock.position.set(-25, 0.1, 40); // Behind the main straight
+        paddock.receiveShadow = true;
+        this.scene.add(paddock);
+        
+        // Garage buildings along paddock
+        const garageMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x666666,
+            shininess: 10 
+        });
+        
+        for (let i = 0; i < 18; i++) {
+            const garageGeometry = new THREE.BoxGeometry(22, 8, 18);
+            const garage = new THREE.Mesh(garageGeometry, garageMaterial);
+            garage.position.set(-225 + i * 25, 4, 45);
+            garage.castShadow = true;
+            this.scene.add(garage);
+            
+            // Garage door (white)
+            const doorMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff });
+            const doorGeometry = new THREE.BoxGeometry(20, 6, 0.2);
+            const door = new THREE.Mesh(doorGeometry, doorMaterial);
+            door.position.set(-225 + i * 25, 3, 36.1);
+            this.scene.add(door);
+        }
+        
+        // Paddock club building - scaled for larger circuit
+        const clubGeometry = new THREE.BoxGeometry(80, 12, 30);
+        const club = new THREE.Mesh(clubGeometry, garageMaterial);
+        club.position.set(0, 6, 75);
+        club.castShadow = true;
+        this.scene.add(club);
+    }
+    
+    addScenery() {
+        // REMOVED - All trees and scenery that might create visual interference
+        // Circuit is now completely clean for pure racing focus
+    }
+    
+    addTrackMarkers() {
+        // REMOVED - All markers and advertising boards that might interfere
+        // Pure clean circuit for optimal racing experience
     }
     
     createCar() {
@@ -409,8 +815,33 @@ class RacingGame {
             this.acceleration = gasInput * 0.3;
         }
         
-        // Simple steering
-        this.steering = steeringInput * this.maxSteering;
+        // Adaptive steering based on input method
+        let currentMaxSteering;
+        let inputMethod = '';
+        
+        // Detect if wheel (gamepad) input is being used
+        if (this.gamepad && Math.abs(steeringInput) > 0 && !this.keys['KeyA'] && !this.keys['KeyD'] && !this.keys['ArrowLeft'] && !this.keys['ArrowRight']) {
+            currentMaxSteering = this.wheelMaxSteering;
+            inputMethod = 'G29 Wheel';
+        }
+        // Detect if keyboard input is being used
+        else if ((this.keys['KeyA'] || this.keys['KeyD'] || this.keys['ArrowLeft'] || this.keys['ArrowRight']) && Math.abs(steeringInput) > 0) {
+            currentMaxSteering = this.keyboardMaxSteering;
+            inputMethod = 'Keyboard';
+        }
+        // Default fallback
+        else {
+            currentMaxSteering = this.maxSteering;
+            inputMethod = 'Default';
+        }
+        
+        // Apply steering with appropriate sensitivity
+        this.steering = steeringInput * currentMaxSteering;
+        
+        // Debug info when steering is applied
+        if (Math.abs(steeringInput) > 0) {
+            console.log(`Steering: ${inputMethod} - Max: ${currentMaxSteering} - Input: ${steeringInput.toFixed(3)} - Applied: ${this.steering.toFixed(3)}`);
+        }
     }
     
     updatePhysics() {

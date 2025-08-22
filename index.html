@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Minecraft Clone</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #87CEEB 0%, #98FB98 100%);
+            font-family: Arial, sans-serif;
+        }
+        
+        canvas {
+            display: block;
+        }
+        
+        #ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            z-index: 100;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            z-index: 100;
+        }
+        
+        #crosshair::before,
+        #crosshair::after {
+            content: '';
+            position: absolute;
+            background: white;
+            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+        }
+        
+        #crosshair::before {
+            width: 2px;
+            height: 20px;
+            left: 9px;
+            top: 0;
+        }
+        
+        #crosshair::after {
+            width: 20px;
+            height: 2px;
+            left: 0;
+            top: 9px;
+        }
+        
+        #command-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            z-index: 100;
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        #command-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        
+        #command-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        #command-output {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            min-height: 60px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        #toggle-commands {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            padding: 10px 15px;
+            background: rgba(76, 175, 80, 0.8);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 100;
+            font-weight: bold;
+        }
+        
+        #toggle-commands:hover {
+            background: rgba(76, 175, 80, 1);
+        }
+    </style>
+</head>
+<body>
+    <div id="ui">
+        <div>Simple Minecraft Clone with AI Builder</div>
+        <div>WASD: Move | Mouse: Look | Click: Remove blocks | T: Toggle AI Commands</div>
+    </div>
+    <div id="crosshair"></div>
+    
+    <button id="toggle-commands">AI Builder (T)</button>
+    
+    <div id="command-panel">
+        <div id="command-output">
+            Welcome to AI Builder! Describe what you want to build and I'll create it for you.
+            <br><br>Examples:
+            <br>• "build a house"
+            <br>• "create a tower 10 blocks tall"
+            <br>• "make a bridge"
+            <br>• "build a pyramid"
+        </div>
+        <input type="text" id="command-input" placeholder="Describe what you want to build..." />
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
